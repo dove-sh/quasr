@@ -1,0 +1,2 @@
+httpListen: '0.0.0.0:7827'
+unixListen: '/var/run/quasr_api.sock'

@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "module": "CommonJS",
+      "noImplicitAny": true,
+      "removeComments": true,
+      "preserveConstEnums": true,
+      "outDir": "build/",
+      "lib": [ "es2022" ],
+      "sourceMap": true,
+      "allowJs": true, 
+      "esModuleInterop": true
+    },
+    
+    "include": ["src/**/*", "src/*"],
+  }
