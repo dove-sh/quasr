@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import { platform } from 'process';
+import { createTextChangeRange } from 'typescript';
 import cli_colors from '../../../common/cli_colors';
 import { ApiModule } from '../types/apiModule';
 export default async function run(argv:any){
@@ -14,6 +15,7 @@ export default async function run(argv:any){
         if (module.features&&module.features.includes('api')){
             verbose(`api: mod ${module.id} has api feature`);
             var apiModule = (module as any) as ApiModule;
+            if (!apiModule||!apiModule.endpoints||apiModule.endpoints.length==0)continue;
             for(var endpoint of apiModule.endpoints){
                 if (endpoint.method=='get')
                     app.get(endpoint.endpoint, endpoint.handler);
@@ -36,6 +38,7 @@ export default async function run(argv:any){
     if (listenUnix)
         app.listen(listenUnix, 
             ()=>console.log(`${cli_colors.dim}[unix] listening on: ${cli_colors.reset}${listenUnix} `))
-    else verbose(`api: not listening on unix ${listenUnix}`)
+    else verbose(`api: not listening on unix ${listenUnix}`);
+    argv.daemon();
     
 }

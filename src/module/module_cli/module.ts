@@ -12,7 +12,7 @@ export default
     by: 'fearfeth', 
     features: ['cli'],
     depends: [], 
-    init: module__init, 
+    load: module__init, 
     start: module__start,
     startAfter: ['*'],
     cliCommands: cliCommands

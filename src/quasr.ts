@@ -60,7 +60,7 @@ declare global{
 
     global.context = await (await import('./context/context')).default();
     
-    async function executeModules(modules:any[], executePropertyName: string, waitPropertyName: string){
+    async function executeModules(modules:any[], executePropertyName: string, waitPropertyName: string, executeContext:any){
         var modulesWaiting = [];
         for(var moduleId in modules) modulesWaiting.push(modules[moduleId]);
         while(modulesWaiting.length!=0){
@@ -80,7 +80,7 @@ declare global{
                         for (var after of module[waitPropertyName]){
                             if (!global.context.modules.hasOwnProperty(after)||!global.context.modules[after])
                             {console.log(`${module.id} is waiting for ${after}, but there's no such module`);ignore=true;}
-                            if (modulesWaiting.filter(e=>e.id==after)){wait=false}
+                            if (modulesWaiting.filter(e=>e.id==after).length!=0){wait=true}
                         }
                     }
                 }
@@ -88,7 +88,7 @@ declare global{
                 if (!ignore&&!wait
                     && module[executePropertyName]){
                         verbose(`quasr: invoke [${module.name}].${executePropertyName}`)
-                         await module[executePropertyName]();
+                         await module[executePropertyName](executeContext(module));
                 }
             }
         }
@@ -99,9 +99,25 @@ declare global{
         var module = global.context.modules[moduleId];
         modules.push(module);
     }
-    
-    await executeModules(modules, 'init', 'initAfter');
-    await executeModules(modules, 'start', 'startAfter');
+
+    let daemonMode:boolean = false;
+    let context = (module:Module)=>{
+        return {
+            daemon: ()=>{
+                daemonMode=true
+                verbose(`quasr: ${module.id} enforced daemon mode; modules won't unload until any kill-signal recieved`);
+            }
+        }
+    }
+    await executeModules(modules, 'load', 'loadAfter', context);
+    await executeModules(modules, 'start', 'startAfter', context);
+
+    if (!daemonMode){
+        await executeModules(modules, 'stop', 'stopAfter', ()=>{});
+    }
+    process.on('SIGTERM', async () => {
+        await executeModules(modules, 'stop', 'stopAfter', ()=>{});
+    });
 })()
 .catch(e=>console.error(e));
 
