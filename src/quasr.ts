@@ -18,11 +18,12 @@ declare global{
 
 //top-level async
 (async ():Promise<void>=>{
-    
+    var lastVerboseMesasge:number=Date.now();
     global.verbose = function (l:any){
         if (process.argv&&process.argv.includes('-v')){
             process.stdout.write(cli_colors.dim);
-            console.log(l);
+            if (typeof l === 'string') console.log(`${Date.now()-lastVerboseMesasge}ms  ${l}`);
+            else console.log(l);
             process.stdout.write(cli_colors.reset);
         } 
     }

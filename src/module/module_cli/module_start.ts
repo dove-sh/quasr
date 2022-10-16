@@ -12,7 +12,7 @@ export async function module__start(ctx:any){
                 let middlewares:yargs.MiddlewareFunction[] = [];
                 let currentModCommand = moduleCommand;
                 yargs.command(currentModCommand.command, currentModCommand.showInHelp, 
-                    currentModCommand.builder, async (args: yargs.ArgumentsCamelCase<{}>) =>{
+                    currentModCommand.builder??(()=>{}), async (args: yargs.ArgumentsCamelCase<{}>) =>{
                         verbose(`cli: running ${currentModCommand.command}`);
                         args.ctx=ctx;
                         args.daemon = ()=>{verbose(`cli: ${module.id} -> "${currentModCommand.command}" enforced daemon mode`); ctx.daemon()}
@@ -26,5 +26,5 @@ export async function module__start(ctx:any){
         }
     }
     
-    await yargs.help().parse();
+    await yargs.parse();
 }

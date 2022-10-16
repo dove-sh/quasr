@@ -12,7 +12,7 @@ export async function getModules():Promise<{[key: string]: Module}>{
 
         global.verbose(`quasr: ${possibleModule.name}.default import`);
 
-        let loadedModule = (await import(
+        let loadedModule = (require(
             path.resolve(__dirname, '../module/'+possibleModule.name+'/module.js')
         )).default as Module;
         verbose(`quasr: [${loadedModule.id}] ${loadedModule.name} [${loadedModule.features.join(', ')}]`);
