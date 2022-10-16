@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { getAppInstance, getAppProvider } from "..";
+import { ApplicationApiModule } from "../types/ApplicationModule";
 
 export async function app_middleware (req:Request,res:Response,next:NextFunction){
     let appProvider = await getAppProvider(req.params.appId);
@@ -11,7 +12,7 @@ export async function app_middleware (req:Request,res:Response,next:NextFunction
     req_.current_app = appInstance;
 
     let router = Router();
-    for(var endpoint of appProvider.application_api){
+    for(var endpoint of (appProvider as any as ApplicationApiModule).application_api){
         if (endpoint.method=='get')
             router.get(endpoint.endpoint, endpoint.handler);
         if (endpoint.method=='post')

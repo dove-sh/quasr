@@ -15,7 +15,7 @@ export async function getModules():Promise<{[key: string]: Module}>{
         let loadedModule = (require(
             path.resolve(__dirname, '../module/'+possibleModule.name+'/module.js')
         )).default as Module;
-        verbose(`quasr: [${loadedModule.id}] ${loadedModule.name} [${loadedModule.features.join(', ')}]`);
+        verbose(`${loadedModule.id}: ${loadedModule.name} (${loadedModule.features.join(', ')})`);
         availableModules[loadedModule.id]=loadedModule;
     }
 

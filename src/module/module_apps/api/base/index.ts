@@ -3,6 +3,6 @@ import { ApiEndpoint } from "../../../module_api/types/apiModule";
 import ApplicationApiContext from "../../types/ApplicationApiContext";
 import state from "./state";
 import status from './status';
-export function implementDefault_base():ApiEndpoint[]{
+export function implementDefaultApi_base():ApiEndpoint[]{
     return implementDirSync(__dirname);
 }

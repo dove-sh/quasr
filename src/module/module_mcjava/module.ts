@@ -1,10 +1,16 @@
 import { ApiModule } from "../module_api/types/apiModule";
 import { CliModule } from "../module_cli/types/cliCommand";
-import {ApplicationModule} from '../module_apps/types/ApplicationModule';
+import {ApplicationCliModule, ApplicationModule, ApplicationApiModule} from '../module_apps/types/ApplicationModule';
 import { MinecraftJavaApp } from "./mcjava";
 import { Application } from "../module_apps/types/Application";
-import { implementDefault_base } from "../module_apps/api/base";
-interface module_quasr_app_mcjava extends Module, ApplicationModule{}
+import { implementDefaultApi_base } from "../module_apps/api/base";
+import ApplicationApiContext from "../module_apps/types/ApplicationApiContext";
+import { implementDefaultCli_base } from "../module_apps/cli/base";
+interface module_quasr_app_mcjava extends
+Module,
+ApplicationModule,
+ApplicationCliModule, 
+ApplicationApiModule{}
 
 export default {
     id: 'app_mcjava',
@@ -13,5 +19,6 @@ export default {
     by: 'fearfeth', 
     features: ['application'],
     application: MinecraftJavaApp as (typeof Application), 
-    application_api: implementDefault_base()
+    application_api: implementDefaultApi_base(),
+    application_cli: implementDefaultCli_base()
 } as module_quasr_app_mcjava

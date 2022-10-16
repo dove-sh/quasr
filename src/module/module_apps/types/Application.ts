@@ -5,6 +5,7 @@ export abstract class Application{
     constructor(entry:IAppEntry){
         this.app=entry;
     }
+    abstract init():any;
     abstract state():any;
     abstract status():Promise<string>;
 }

@@ -8,6 +8,9 @@ export class MinecraftJavaApp extends Application{
         console.log('mc consturcetd lol');
         super(entry)
     }
+    public async init() {
+        console.log('init called lol');
+    }
     public state() {
         throw new Error("Method not implemented.");
     }

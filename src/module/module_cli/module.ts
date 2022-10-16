@@ -2,7 +2,8 @@ import { CliModule } from "./types/cliCommand";
 
 import { module__init } from "./module_init";
 import { module__start } from "./module_start";
-import cliCommands from "./cli/_cli";
+import { includeCliDir } from ".";
+import path from "path";
 interface quasr_module_cli extends Module, CliModule{}
 export default 
 {
@@ -15,5 +16,5 @@ export default
     load: module__init, 
     start: module__start,
     startAfter: ['*'],
-    cliCommands: cliCommands
+    cliCommands: includeCliDir(path.resolve(__dirname, './cli'),{})
 } as quasr_module_cli
