@@ -7,5 +7,6 @@ export interface minecraft_startup{
 }
 export interface minecraft_config{
     startup:minecraft_startup, 
-    dir: PathLike
+    dir: PathLike,
+    forceConfigure:boolean
 }

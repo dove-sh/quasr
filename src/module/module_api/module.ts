@@ -11,7 +11,7 @@ return {
     id:'api',
     name:'Quasr (api)',
     describe: 'HTTP Api server',
-    by:'fearfeth',
+    by:'feli',
     icon: '🌍',
     features: ['api','cli'],
     depends: [],

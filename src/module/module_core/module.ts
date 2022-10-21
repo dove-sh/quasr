@@ -10,7 +10,7 @@ export default async ()=>{
     id: 'core',
     name: 'Quasr (core)',
     describe: 'base functionality', 
-    by: 'fearfeth', 
+    by: 'feli', 
     features: ['cli', 'api'],
     depends: [], 
     icon: '🌃',

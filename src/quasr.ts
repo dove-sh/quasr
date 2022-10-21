@@ -10,12 +10,15 @@ import * as url from 'url';
 declare global{
     var context:Context;
     var verbose:Function;
+    var print:Function;
     var config:any;
     var __dirname:string;
     var __filename:string;
+    var isCli:boolean;
 }
 global.__filename = url.fileURLToPath(import.meta.url);
 global.__dirname = url.fileURLToPath(new URL('.', import.meta.url));
+global.isCli = true;
 //top-level async
 (async ():Promise<void>=>{
     var lastVerboseMesasge:number=Date.now();
@@ -26,6 +29,9 @@ global.__dirname = url.fileURLToPath(new URL('.', import.meta.url));
             else console.log(l);
             process.stdout.write(cli_colors.reset);
         } 
+    }
+    global.print = function(l:any){
+        if (global.isCli)console.log(l);
     }
     verbose(`quasr: hello world!`);
 

@@ -1,0 +1,3 @@
+dir: "%appdata%\\Quasr\\app_asdf"
+startup:
+  jarPath: "%appdata%\\Quasr\\app_asdf/server_2.jar"

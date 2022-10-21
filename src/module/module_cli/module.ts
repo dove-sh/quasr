@@ -14,7 +14,7 @@ return {
     id: 'cli',
     name: 'Quasr (cli)',
     describe: './quasr', 
-    by: 'fearfeth', 
+    by: 'feli', 
     features: ['cli'],
     depends: [], 
     icon: '💻',

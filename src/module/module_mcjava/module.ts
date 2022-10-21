@@ -16,10 +16,10 @@ export default {
     id: 'app_mcjava',
     name: 'Minecraft',
     describe: 'Application provider for Minecraft: Java Edition (vanila) server', 
-    by: 'fearfeth', 
+    by: 'feli', 
     icon: '⛏️',
     features: ['application'],
-    application: MinecraftJavaApp as (typeof Application), 
+    application: MinecraftJavaApp as (typeof Application),
     application_api: implementDefaultApi_base(),
     application_cli: implementDefaultCli_base()
 } as module_quasr_app_mcjava

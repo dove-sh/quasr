@@ -49,5 +49,6 @@ export default async function run(argv:any){
             ()=>console.log(`${cli_colors.dim}[unix] listening on: ${cli_colors.reset}${listenUnix} `))
     else verbose(`api: not listening on unix ${listenUnix}`);
     argv.daemon();
+    global.isCli = false;
     
 }

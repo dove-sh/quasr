@@ -11,7 +11,7 @@ export default async ()=>{
     id: 'apps',
     name: 'Quasr (apps)',
     describe: 'default app manager', 
-    by: 'fearfeth', 
+    by: 'feli', 
     features: ['cli', 'api'],
     depends: [], 
     loadAfter: [],

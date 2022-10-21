@@ -1,11 +1,18 @@
 import { existsSync, fstat, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { writeFile } from "fs/promises";
+import { platform } from "os";
 import path from "path";
+import { openStdin } from "process";
 import { ConfigFileDiagnosticsReporter } from "typescript";
 import * as YAML from 'yaml'
 import { IAppEntry } from "./IAppEntry";
 
 export interface IAppConfiguration{
     [key: string]:any
+}
+export function getNewAppConfigPath(appId:string){
+    if (process.platform == 'win32') return path.resolve(process.env.APPDATA, `Quasr\\app_${appId}.yml`);
+    else return `/etc/app_${appId}.yml`
 }
 export abstract class Application{
     protected app:IAppEntry;
@@ -24,6 +31,16 @@ export abstract class Application{
         
         this.config = app_config ? app_config as IAppConfiguration : {};
         this.app=entry;
+    }
+    protected async saveConfig(config?:IAppConfiguration){
+        (this.app.app_config_path.endsWith('.yml')||this.app.app_config_path.endsWith('.yaml'))?
+        await writeFile(this.app.app_config_path, YAML.stringify(config??this.config))
+        :await writeFile(this.app.app_config_path, JSON.stringify(config??this.config));
+    }
+
+    protected getNewAppPath(){
+        if (process.platform == 'win32') return path.resolve(process.env.APPDATA,`Quasr\\app_${this.app.app_id}`);
+        else return `/var/app_${this.app.app_id}`
     }
     abstract init():any;
     abstract state():any;

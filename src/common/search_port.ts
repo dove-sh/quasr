@@ -42,3 +42,10 @@ export async function getUsedPorts():Promise<UsedPort[]>{
         return {port: p.port, ip: p.ip, usedBy: p.usedBy}
     });
 }
+
+export async function usePort(port: UsedPort):Promise<UsedPort>{
+    
+    var p = new storage.usedPorts({ip: port.ip, port: port.port, usedBy: port.usedBy});
+    await p.save();
+    return p;
+}

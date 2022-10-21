@@ -1,6 +1,7 @@
 
 import { getAppInstance, getAppProvider, getProvider } from "..";
 import { CliFunctionContext } from "../../module_cli/types/cliCommand";
+import { Application, getNewAppConfigPath } from "../types/Application";
 
 export default async function({cli}:CliFunctionContext){
    cli('initapp', async (args)=>{
@@ -9,8 +10,7 @@ export default async function({cli}:CliFunctionContext){
 
     let provider = await getProvider(args.provider);
     if (!provider) return console.log('provider '+args.provider+' doesnt exist');
-
-    var newAppEntry = new storage.app({app_id: args.id, app_provider: args.provider});
+    var newAppEntry = new storage.app({asdf: true, app_id: args.id, app_provider: args.provider, app_config_path: getNewAppConfigPath(args.id)});
     await newAppEntry.save();
 
     var appInstance = await getAppInstance(args.id);
