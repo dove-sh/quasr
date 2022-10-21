@@ -1,7 +1,7 @@
-import path = require("path");
-import fs = require('fs/promises');
+import path from "path";
+import fs from 'fs/promises';
 export async function getModules():Promise<{[key: string]: Module}>{
-    let modulesDir = path.resolve(__dirname, '../module');
+    let modulesDir = path.resolve(__dirname, 'module');
     let modulesDirs = await fs.readdir(modulesDir, {withFileTypes: true});
 
     let availableModules:{[key: string]: Module}={};
@@ -11,10 +11,12 @@ export async function getModules():Promise<{[key: string]: Module}>{
 
 
         global.verbose(`quasr: ${possibleModule.name}.default import`);
-
-        let loadedModule = (require(
-            path.resolve(__dirname, '../module/'+possibleModule.name+'/module.js')
-        )).default as Module;
+        
+        let importPath = 'file:'+
+        path.resolve(__dirname, 'module/'+possibleModule.name+'/module.js');
+        let loadedModule = (await import(importPath)).default as Module;
+        if (loadedModule instanceof Function){loadedModule = loadedModule()}
+        if (loadedModule instanceof Promise){loadedModule = await loadedModule}
         verbose(`${loadedModule.id}: ${loadedModule.name} (${loadedModule.features.join(', ')})`);
         availableModules[loadedModule.id]=loadedModule;
     }

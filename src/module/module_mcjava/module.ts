@@ -17,6 +17,7 @@ export default {
     name: 'Minecraft',
     describe: 'Application provider for Minecraft: Java Edition (vanila) server', 
     by: 'fearfeth', 
+    icon: '⛏️',
     features: ['application'],
     application: MinecraftJavaApp as (typeof Application), 
     application_api: implementDefaultApi_base(),

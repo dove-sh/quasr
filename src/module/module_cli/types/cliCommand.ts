@@ -1,4 +1,4 @@
-import yargs = require("yargs");
+import yargs from "yargs";
 
 export interface CliModule{
     cliCommands: CliCommand[]

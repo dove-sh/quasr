@@ -1,4 +1,4 @@
-import yargs = require("yargs");
+import yargs from "yargs";
 import { CliCommand } from "../../module_cli/types/cliCommand";
 import run from './run';
 

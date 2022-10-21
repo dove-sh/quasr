@@ -8,7 +8,7 @@ export default async function({cli}:CliFunctionContext){
 
         for(var module of modules){
             console.log(
-`${c.dim}[${module.id}]${c.reset} ${c.bright}${module.name}${c.reset}
+`${module.icon}  ${c.dim}[${module.id}]${c.reset} ${c.bright}${module.name}${c.reset}
     by: ${module.by}  features: ${c.dim}[${c.reset}${module.features.join(', ')}${c.dim}]${c.reset}
     ${module.describe}`
 )

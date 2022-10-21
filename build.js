@@ -1,6 +1,9 @@
-const prc = require('child_process');
-const fs = require('fs/promises');
-const path = require('path');
+import * as prc from 'child_process';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import * as url from 'url';
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 async function exec(exec, cwd='.'){
 	console.log(`=>  ${exec}`);
 	let run = prc.spawn(process.platform == "win32" ? `cmd` : `bash`,
@@ -20,12 +23,12 @@ async function exec(exec, cwd='.'){
 
 (async ()=>{
 
-    let brand_ts_file = await (await fs.readFile(path.resolve(__dirname, './src/context/context.ts'))).toString();
-    await fs.writeFile(path.resolve(__dirname, './src/context/context.ts'), brand_ts_file.replaceAll("$_VERSION",process.env.npm_package_version));
+    let brand_ts_file = await (await fs.readFile(path.resolve(__dirname, './src/base/context.ts'))).toString();
+    await fs.writeFile(path.resolve(__dirname, './src/base/context.ts'), brand_ts_file.replaceAll("$_VERSION",process.env.npm_package_version));
 
 	await exec ('rd /s /q build');
 
-    await exec('npx tsc') 
-    && await exec('node build/quasr.js -v');
-    await fs.writeFile(path.resolve(__dirname, './src/context/context.ts'),brand_ts_file);
+    await exec('npx swc ./src -d ./build') 
+    && await exec('node --experimental-specifier-resolution=node build/quasr.js -v');
+    await fs.writeFile(path.resolve(__dirname, './src/base/context.ts'),brand_ts_file);
 })();

@@ -7,8 +7,8 @@ import { ApiEndpoint } from "./types/apiModule";
 import deasync from 'deasync';
 
 
-export function implementDirSync(dir:PathLike,context:any={}):ApiEndpoint[]{
-    if (!existsSync(dir)) throw 'no such directory';
+export async function implementDirSync(dir:PathLike,context:any={}):Promise<ApiEndpoint[]>{
+    if (!existsSync(dir)) throw 'api: implementDir - no such directory '+dir;
     let endpoints:ApiEndpoint[]=[];
     verbose(`api: parsing routes from ${dir.toString()}`);
     var read = readdirSync(dir, {withFileTypes:true});
@@ -16,7 +16,7 @@ export function implementDirSync(dir:PathLike,context:any={}):ApiEndpoint[]{
     for(var dirent of read){
         if (dirent.isFile()&&(dirent.name.endsWith('.route.js')||dirent.name.endsWith('.route.ts'))){
             verbose(`api: require ${path.resolve(dir as string,dirent.name)}`);
-            let routeModule = (require(path.resolve(dir as string,dirent.name))).default;
+            let routeModule = (await import('file:'+path.resolve(dir as string,dirent.name))).default;
             verbose(`api: invoke ${dirent.name}`);
             context.app = {
                 get: (endpoint: string, handler: (req: Request, res: Response)=>any)=>

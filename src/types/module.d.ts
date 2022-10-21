@@ -2,7 +2,8 @@ interface Module{
     id:string
     name:string
     describe: string
-    by:string
+    by:string,
+    icon:string|'🧩',
 
     features: string[]
     depends: string[]

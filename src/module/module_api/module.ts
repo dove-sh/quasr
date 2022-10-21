@@ -5,16 +5,17 @@ import {implementDirSync} from './index';
 import path from "path";
 interface quasr_module_api extends ApiModule, CliModule, Module{}
 
-export default {
+export default async ()=>{
+return {
 
     id:'api',
     name:'Quasr (api)',
     describe: 'HTTP Api server',
     by:'fearfeth',
-
+    icon: '🌍',
     features: ['api','cli'],
     depends: [],
     cliCommands: cli, 
-    endpoints: implementDirSync(path.resolve(__dirname,'./api'))
+    endpoints: await implementDirSync(path.resolve(__dirname,'module/module_api/api'))
 
-} as quasr_module_api;
+} as quasr_module_api;}

@@ -1,21 +1,21 @@
-
-import './import';
-import * as yargs from 'yargs';
-import {getFiles} from './common/fs_extensions';
-import path = require('path');
-import { fileURLToPath } from 'url';
+#!/usr/bin/node --experimental-specifier-resolution=node
 import { Dirent, existsSync, fstat, PathLike} from 'fs';
 import {readdir, readFile} from 'fs/promises';
 import { platform } from 'os';
 import { parse } from 'yaml';
 import { resolve } from 'path';
 import cli_colors from './common/cli_colors';
+import * as mongo from './base/mongo';
+import * as url from 'url';
 declare global{
     var context:Context;
     var verbose:Function;
     var config:any;
+    var __dirname:string;
+    var __filename:string;
 }
-
+global.__filename = url.fileURLToPath(import.meta.url);
+global.__dirname = url.fileURLToPath(new URL('.', import.meta.url));
 //top-level async
 (async ():Promise<void>=>{
     var lastVerboseMesasge:number=Date.now();
@@ -59,7 +59,9 @@ declare global{
     verbose('quasr: look at this config');
     verbose(config);
 
-    global.context = await (await import('./context/context')).default();
+    global.context = await (await import('./base/context')).default();
+
+    await mongo.init();
     
     async function executeModules(modules:any[], executePropertyName: string, waitPropertyName: string, executeContext:any){
         var modulesWaiting = [];
@@ -115,9 +117,11 @@ declare global{
 
     if (!daemonMode){
         await executeModules(modules, 'stop', 'stopAfter', ()=>{});
+        await mongo.stop();
     }
     process.on('SIGTERM', async () => {
         await executeModules(modules, 'stop', 'stopAfter', ()=>{});
+        await mongo.stop();
     });
 })()
 .catch(e=>console.error(e));

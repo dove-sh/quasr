@@ -1,5 +1,4 @@
 
-import yargs = require("yargs");
 import { implementCliCommands } from ".";
 import { CliModule } from "./types/cliCommand";
 

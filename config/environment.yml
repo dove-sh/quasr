@@ -1,0 +1,8 @@
+runningIn: dove
+isContainer: lxc
+ports:
+  - 
+    publicIp: 193.70.95.112
+    port: 12415
+    for: app
+    privateIp: 0.0.0.0
