@@ -16,8 +16,6 @@ export default async ()=>{
     depends: [], 
     loadAfter: [],
     icon: '🍏',
-    startAfter: ['*'],
-    start: module_start,
     load: module_load,
     cliCommands: await includeCliDir(path.resolve(__dirname, 'module/module_apps/cli'),{}),
     api_middlewares: [{endpoint: '/app/:appId', handler: app_middleware}]

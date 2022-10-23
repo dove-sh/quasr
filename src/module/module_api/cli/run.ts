@@ -2,10 +2,16 @@ import express, { Express, Request, Response } from 'express';
 import { platform } from 'process';
 import { createTextChangeRange } from 'typescript';
 import cli_colors from '../../../common/cli_colors';
-import { ApiModule } from '../types/apiModule';
+import { ApiModule, HttpRequestHandler } from '../types/apiModule';
+import expressWs, { WebsocketRequestHandler } from 'express-ws';
+import bodyParser from 'body-parser';
 export default async function run(argv:any){
     console.log(`${context.brand.cli_icon} ${context.brand.cli_accent}api${cli_colors.reset} started`)
     const app = express();
+    // parse application/json
+    app.use(bodyParser.json())
+    var expressWebsocket = expressWs(app);
+    
     let listenHttp = argv.listenHttp
      || process.env.QUASR_LISTEN_HTTP
      || (config.api&&config.api.httpListen);
@@ -21,12 +27,15 @@ export default async function run(argv:any){
                     app.use(middlware.endpoint,middlware.handler);
                 }
             }
-            if (apiModule&&apiModule.endpoints&&apiModule.endpoints.length==0){
+            
+            if (apiModule&&apiModule.endpoints&&apiModule.endpoints.length!=0){
                 for(var endpoint of apiModule.endpoints){
                     if (endpoint.method=='get')
-                        app.get(endpoint.endpoint, endpoint.handler);
+                        app.get(endpoint.endpoint, endpoint.handler as HttpRequestHandler);
                     if (endpoint.method=='post')
-                        app.post(endpoint.endpoint, endpoint.handler);
+                        app.post(endpoint.endpoint, endpoint.handler as HttpRequestHandler);
+                    if (endpoint.method=='ws')
+                        expressWebsocket.app.ws(endpoint.endpoint, endpoint.handler as WebsocketRequestHandler);
     
                     verbose(`api: mod ${module.id} implements endpoint ${endpoint.method} "${endpoint.endpoint}"`)
                 }

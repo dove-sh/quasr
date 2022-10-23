@@ -1,4 +1,4 @@
-import yargs from "yargs";
+import _yargs from "yargs";
 import c from '../../../common/cli_colors';
 import { getAppInstance, getAppProvider } from "..";
 import { CliFunctionContext } from "../../module_cli/types/cliCommand";
@@ -12,14 +12,17 @@ export default async function({cli}:CliFunctionContext){
         var appProvider = await getAppProvider(appId);
         if (!appInstance||!appProvider) return console.log(`${c.red}${c.dim}error: ${c.reset} application "${appId}" doesn't exist`);
     
-        for(var module of Object.values(context.modules)){
-            if (!module.features.includes('app_cli')) continue;
-            verbose(`app_cli: ${module.id} has app_cli feature`);
-            var cliModule = module as any as ApplicationCliModule;
-            let y = yargs(argv.slice(2));
-            args.current_app = appInstance;
-            await implementCliCommands(yargs, cliModule.application_cli, args, module.id);
-        }
+        let y = _yargs(argv.slice(2));
+
+        if (!(appProvider as any as Module).features.includes('app_cli')) return console.log(`${c.red}${c.dim}error: ${c.reset} application "${appId}" doesn't support app_cli`);
+        verbose(`app_cli: ${(appProvider as any as Module).id} has app_cli feature`);
+        var cliModule = appProvider as any as ApplicationCliModule;
+        args.current_app = appInstance;
+        
+        await implementCliCommands(y, cliModule.application_cli, args, (appProvider as any as Module).id);
+
+        verbose('app_cli: trying to run');
+        await y.parse();
     });
 
 } 

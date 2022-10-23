@@ -14,7 +14,8 @@ export async function implementDirSync(dir:PathLike,context:any={}):Promise<ApiE
     var read = readdirSync(dir, {withFileTypes:true});
     
     for(var dirent of read){
-        if (dirent.isFile()&&(dirent.name.endsWith('.route.js')||dirent.name.endsWith('.route.ts'))){
+        if (dirent.isFile()&&(dirent.name.endsWith('.route.js')||dirent.name.endsWith('.route.ts')
+        ||dirent.name.endsWith('.api.js')||dirent.name.endsWith('.api.ts'))){
             verbose(`api: require ${path.resolve(dir as string,dirent.name)}`);
             let routeModule = (await import('file:'+path.resolve(dir as string,dirent.name))).default;
             verbose(`api: invoke ${dirent.name}`);

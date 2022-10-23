@@ -12,14 +12,14 @@ ApplicationModule,
 ApplicationCliModule, 
 ApplicationApiModule{}
 
-export default {
+export default async()=>{return {
     id: 'app_mcjava',
     name: 'Minecraft',
     describe: 'Application provider for Minecraft: Java Edition (vanila) server', 
     by: 'feli', 
     icon: '⛏️',
-    features: ['application'],
+    features: ['application', 'app_cli'],
     application: MinecraftJavaApp as (typeof Application),
-    application_api: implementDefaultApi_base(),
-    application_cli: implementDefaultCli_base()
-} as module_quasr_app_mcjava
+    application_api: await implementDefaultApi_base(),
+    application_cli: await implementDefaultCli_base()
+} as module_quasr_app_mcjava}
