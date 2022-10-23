@@ -3,12 +3,16 @@ import { attachedProcess, ranProcess, runner, runOptions, runPtySize } from "../
 import WebSocket from 'ws';
 import { json } from "stream/consumers";
 async function get(result:{pid:number, tags:string[], key: string}):Promise<ranProcess>{
+    verbose(`runtty: [${result.key}] proxying daemon child process, pid ${result.pid}`);
     return {
         tags: result.tags, key: result.key, pid: result.pid,
         onKilled(handler) {
-            req('/_ipc_runner/event_onKilled', {key: result.key}).then(r=>r.json()).then(r=>handler(r.exitCode));
+            req('/_ipc_runner/event_onKilled', {key: result.key}).then(r=>r.json()).then(r=>{
+                verbose(`runtty: [${result.key}] got from daemon that process has been killed with exitCode ${r.exitCode}`);
+                handler(r.exitCode)});
         },
         kill() {
+            verbose(`runtty: [${result.key}] proxied killing`);
             req('/_ipc_runner/kill', {key:result.key}).then(r=>r.json())
         }, 
         alive():boolean{
@@ -23,19 +27,27 @@ async function get(result:{pid:number, tags:string[], key: string}):Promise<ranP
             req('/_ipc_runner/push', {key:result.key, data:data}).then(r=>r.json())
         },
         async attach():Promise<attachedProcess>{
+            verbose(`runtty: [${result.key}] proxy attaching...`);
             let ws = websock('/_ipc_runner/attach/'+result.key);
             let onOutputListeners:((data:string)=>any)[] = [];
             let onKilledListeners:((exitCode: number) => any)[] = [];
             let alive = true;
-            console.log(ws.readyState);
-            ws.on('close', (code: number, reason:Buffer)=>{console.log('close '+code); console.log(reason)})
-            ws.on('error', (err: Error)=>console.log(err));
-            
+            verbose(`runtty: [${result.key}] connection: ${ws.readyState}`);
+            ws.on('close', (code: number, reason: Buffer)=>{
+                verbose(`runtty: [${result.key}] connection closed with code ${code}`);
+                verbose(`runtty: reason is ${reason.toString()}`);
+            });
+            ws.on('error', (err: Error)=>{
+                verbose(`runtty: [${result.key}] connection error: ${err.toString()}`)
+            })
+            ws.on('open', ()=>{
+                verbose(`runtty: [${result.key}] connection opened`);
+            })
             ws.on('message', (data:WebSocket.RawData, isBinary:boolean)=>{
-                console.log('ws data recv');
                 if (data.toString().startsWith('¡')){
                     var jsonData = JSON.parse(data.toString().substring(1));
                     if (jsonData.exitCode){
+                        verbose(`runtty: [${result.key}] got from attached daemon that process has been killed with exitCode ${jsonData.exitCode} `);
                         alive = false;
                         for(var listener1 of onKilledListeners) listener1(jsonData.exitCode);
                     }
@@ -57,6 +69,7 @@ async function get(result:{pid:number, tags:string[], key: string}):Promise<ranP
                     onKilledListeners.push(handler)
                 },
                 detach() {
+                    verbose(`runtty: [${result.key}] asking daemon to detach proxy (ws)`);
                     ws.send('¡'+JSON.stringify({detach: true}));
                 }
             } as attachedProcess
@@ -64,7 +77,6 @@ async function get(result:{pid:number, tags:string[], key: string}):Promise<ranP
     } as ranProcess
 }
 export async function create(options:runOptions,key:string,tags:string[]=[]):Promise<ranProcess>{
-    verbose({options, key, tags});
     let result = await req('/_ipc_runner/create', {options, key, tags}) as {pid:number, tags:string[], key: string}
     return await get(result);
 }

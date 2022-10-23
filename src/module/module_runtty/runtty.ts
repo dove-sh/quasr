@@ -1,11 +1,11 @@
 import { spawn } from "node-pty";
+import { exitCode } from "process";
 import { attachedProcess, ranProcess, runner, runOptions } from "../../types/runner";
 
 declare global{
     var module_runtty_runners:{[key:string]:ranProcess};
 }
 export async function find(key:string){
-    console.log(global.module_runtty_runners);
     return global.module_runtty_runners[key];
 }
 export async function create(options:runOptions,key:string,tags:string[]=[]):Promise<ranProcess>{
@@ -18,12 +18,13 @@ export async function create(options:runOptions,key:string,tags:string[]=[]):Pro
     let procAlive = true;
     let onExitHandlers:any[] = [];
     let onDataHandlers:((data:string)=>any)[] = [];
+    verbose(`runtty: created new tty (${options.path}${options.args&&options.args.length!=0 ? ' '+options.args.join(' ') : ''}), pid: ${proc.pid}`);
     proc.onExit((e: {exitCode:number, signal:number})=>{
+        verbose(`runtty: tty exited with exitCode ${exitCode}`);
         procAlive = false;
         for(var exitHandler of onExitHandlers) exitHandler({exitCode:e.exitCode});
     });
     proc.onData((e:string)=>{
-        console.log('on data recieved');
         for(var dataHandler of onDataHandlers) dataHandler(e)
     });
 
@@ -40,6 +41,7 @@ export async function create(options:runOptions,key:string,tags:string[]=[]):Pro
             onExitHandlers.push(handler);
         },
         attach:async():Promise<attachedProcess>=>{
+            verbose(`runtty: tty attached`);
             return {
                 input(data:string){
                     if (this.detached || !procAlive) return;
@@ -60,6 +62,7 @@ export async function create(options:runOptions,key:string,tags:string[]=[]):Pro
                     onExitHandlers.push(handler)
                 },
                 detach() {
+                    verbose(`runtty: tty detached`);
                     this.detached = true;
                     if (this._attachedKilledHandlers){
                         for(var handler of this._attachedKilledHandlers){

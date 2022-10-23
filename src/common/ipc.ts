@@ -13,7 +13,6 @@ export function websock(endpoint: string):ws{
     else return tcp_ws(endpoint);
 }
 export function tcp_ws(endpoint: string):ws{
-    console.log('ws://' + (global.config.api.httpListen.replaceAll('0.0.0.0','127.0.0.1') ?? '127.0.0.1:7827') +endpoint);
     var websock = new ws('ws://' + (global.config.api.httpListen.replaceAll('0.0.0.0','127.0.0.1') ?? '127.0.0.1:7827') +endpoint);
     return websock;
 }
@@ -24,11 +23,10 @@ export function unix_ws(endpoint: string):ws{
 }
 export async function http_req(endpoint:string, data:any={}, method:'post'|'get'='post'):Promise<any>{
     var path = 'http://' + (global.config.api.httpListen.replaceAll('0.0.0.0','127.0.0.1') ?? '127.0.0.1:7827') + endpoint;
-    verbose(data);
     return await fetch('http://' + (global.config.api.httpListen.replaceAll('0.0.0.0','127.0.0.1') ?? '127.0.0.1:7827') + endpoint, {
         method, headers: {'Content-Type':'application/json'},
         body: JSON.stringify(data)
-    }).then(r=>r.text()).then(r=>{console.log(r); return JSON.parse(r)});
+    }).then(r=>r.json());
 }
 export function unix_req(endpoint:string, data:any={}, method:'post'|'get'='post'):Promise<any>{
 	return new Promise((resolve, reject) =>{

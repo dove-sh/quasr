@@ -7,7 +7,6 @@ import * as ws from 'ws';
 import { json } from "stream/consumers";
 export default function(ctx:any):void{
     ctx.app.post('/_ipc_runner/create', async (req:Request,res:Response)=>{
-        verbose(req.body);
         let options = req.body as {options: runOptions, key: string, tags: string[]};
         let result = await runner.create(options.options, options.key, options.tags);
         return res.json({pid:result.pid, tags:result.tags, key: result.key});

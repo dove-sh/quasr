@@ -10,7 +10,7 @@ export default async function({cli}:CliFunctionContext){
         let run = await runner.create({path:'cmd.exe', args: [], size: {cols: 100, rows: 100}}, 'asdf', []);
         let attach = await run.attach();
         attach.input('echo asdf;');
-        attach.onOutput((data:string)=>console.log(data));
+        //attach.onOutput((data:string)=>console.log(data));
         attach.onKilled((exitCode:number)=>{console.log("KILLED "+exitCode)});
         attach.resize({cols: 5, rows: 5});
 
