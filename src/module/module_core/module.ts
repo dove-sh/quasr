@@ -14,7 +14,7 @@ export default async ()=>{
     features: ['cli', 'api'],
     depends: [], 
     icon: '🌃',
-    loadAfter: ['mongo'],
+    loadAfter: [],
     load: init,
     cliCommands: await includeCliDir(path.resolve(__dirname, 'module/module_core/cli'),{})
 } as module_quasr_core}

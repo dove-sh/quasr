@@ -1,4 +1,4 @@
-#!/usr/bin/node --experimental-specifier-resolution=node
+#!/usr/bin/node --experimental-specifier-resolution=node --no-warnings
 import { Dirent, existsSync, fstat, PathLike} from 'fs';
 import {readdir, readFile} from 'fs/promises';
 import { platform } from 'os';
@@ -21,13 +21,15 @@ global.__dirname = url.fileURLToPath(new URL('.', import.meta.url));
 global.isCli = true;
 //top-level async
 (async ():Promise<void>=>{
+    
     var lastVerboseMesasge:number=Date.now();
     global.verbose = function (l:any){
         if (process.argv&&process.argv.includes('-v')){
             process.stdout.write(cli_colors.dim);
-            if (typeof l === 'string') console.log(`${Date.now()-lastVerboseMesasge}ms  ${l}`);
+            if (typeof l === 'string') console.log(`${Date.now()-lastVerboseMesasge}ms  ${l.replaceAll(`!!!`,`${cli_colors.red}!!!${cli_colors.reset}`)}`);
             else console.log(l);
             process.stdout.write(cli_colors.reset);
+            //lastVerboseMesasge=Date.now();
         } 
     }
     global.print = function(l:any){

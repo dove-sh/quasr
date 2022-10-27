@@ -9,12 +9,12 @@ export default function(ctx:any):void{
     ctx.app.post('/_ipc_runner/create', async (req:Request,res:Response)=>{
         let options = req.body as {options: runOptions, key: string, tags: string[]};
         let result = await runner.create(options.options, options.key, options.tags);
-        return res.json({pid:result.pid, tags:result.tags, key: result.key});
+        return res.json(result ? {pid:result.pid, tags:result.tags, key: result.key} : {_undefined:true});
     });
     ctx.app.post('/_ipc_runner/find', async (req:Request,res:Response)=>{
         let options = req.body as {key: string};
         let result = await runner.find(options.key);
-        return res.json({pid:result.pid, tags:result.tags, key: result.key});
+        return res.json(result ? {pid:result.pid, tags:result.tags, key: result.key} : {_undefined:true});
     });
     ctx.app.post('/_ipc_runner/event_onKilled', async (req:Request,res:Response)=>{
         let instance = await runner.find(req.body.key);
@@ -24,7 +24,7 @@ export default function(ctx:any):void{
     });
     ctx.app.post('/_ipc_runner/alive', async (req:Request,res:Response)=>{
         let instance = await runner.find(req.body.key);
-        return res.json({alive:instance.alive});
+        return res.json({alive:await instance.alive()});
     });
     ctx.app.post('/_ipc_runner/kill', async (req:Request,res:Response)=>{
         let instance = await runner.find(req.body.key);

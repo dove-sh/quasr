@@ -31,7 +31,7 @@ export async function create(options:runOptions,key:string,tags:string[]=[]):Pro
     let ran = {
         tags, key,
         pid:proc.pid,
-        alive:()=>procAlive,
+        alive:async()=>procAlive,
         kill:()=>proc.kill(),
         push(data:string){
             if (!procAlive) return;

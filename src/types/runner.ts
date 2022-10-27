@@ -16,7 +16,7 @@ export interface ranProcess{
     tags:string[],
     key:string,
     pid:number,
-    alive():boolean,
+    alive():boolean|Promise<boolean>,
     kill():void,
     attach():Promise<attachedProcess>,
     push(data:string):any,

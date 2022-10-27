@@ -1,5 +1,5 @@
 export abstract class StartableApplication{
-    abstract start():any;
-    abstract stop():any;
-    abstract restart():any;
+    abstract start():Promise<any>;
+    abstract stop():Promise<any>;
+    abstract restart():Promise<any>;
 }

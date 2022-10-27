@@ -29,6 +29,6 @@ async function exec(exec, cwd='.'){
 	await exec ('rd /s /q build');
 
     await exec('npx swc ./src -d ./build') 
-    && await exec('node --experimental-specifier-resolution=node build/quasr.js app asdf228 status -v');
+    && await exec('node --experimental-specifier-resolution=node --no-warnings build/quasr.js app');
     await fs.writeFile(path.resolve(__dirname, './src/base/context.ts'),brand_ts_file);
 })();

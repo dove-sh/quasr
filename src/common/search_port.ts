@@ -7,7 +7,7 @@ export async function getPort(portFor:string='any', includeUsedPorts:boolean=fal
     if (global.config.environment && global.config.environment.ports){
         portsAvailable = global.config.environment.ports;
         portsAvailable = portsAvailable.filter(p=>p.for==portFor);
-        if (host)portsAvailable=portsAvailable.filter(p=>p.for==host);
+        if (host)portsAvailable=portsAvailable.filter(p=>p.privateIp==host);
     }
     var portsExcluded:number[] = [];
     if (!includeUsedPorts){
@@ -42,9 +42,16 @@ export async function getUsedPorts():Promise<UsedPort[]>{
         return {port: p.port, ip: p.ip, usedBy: p.usedBy}
     });
 }
-
-export async function usePort(port: UsedPort):Promise<UsedPort>{
-    
+export function getPublicIp(ip:string, port:number):string{
+    if (config.environment && config.environment.ports){
+        let avail = config.environment.ports.filter((p:any)=>p.privateIp==ip&&p.port==port);
+        if (avail&&avail.length != 0&&avail[0].publicIp) return avail[0].publicIp;
+    }
+    // todo: fetch ip from dragonhost.org
+    else return '0.0.0.0';
+}
+export async function usePort(port: UsedPort,unuseOthers:boolean=false):Promise<UsedPort>{
+    if (unuseOthers) storage.usedPorts.deleteMany({usedBy:port.usedBy});
     var p = new storage.usedPorts({ip: port.ip, port: port.port, usedBy: port.usedBy});
     await p.save();
     return p;

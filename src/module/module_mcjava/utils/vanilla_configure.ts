@@ -4,11 +4,11 @@ import path from "path";
 import { UsedPort } from "../../../base/mongo/usedPorts";
 import { getPort, getUsedPorts, usePort } from "../../../common/search_port";
 import { availablePortDefinition } from "../../../types/port";
-import { minecraft_config } from "../types/config";
+import { minecraft_config, minecraft_startup } from "../types/config";
 import * as server_properties from './server_properties';
 
 export default async function(config:minecraft_config, app_id:string):Promise<minecraft_config>{
-    if (!config.startup) config.startup = {};
+    if (!config.startup) config.startup = {} as minecraft_startup;
     if (!config.startup.jarPath) config.startup.jarPath = 'auto';
     
     let serverPropPath = path.resolve(config.dir as string, 'server.properties');

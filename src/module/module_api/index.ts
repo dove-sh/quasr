@@ -5,9 +5,14 @@ import path from "path";
 import { isAnyArrayBuffer } from "util/types";
 import { ApiEndpoint } from "./types/apiModule";
 import deasync from 'deasync';
+import module_import_condition from "./module_import_condition";
 
 
 export async function implementDirSync(dir:PathLike,context:any={}):Promise<ApiEndpoint[]>{
+    if(!module_import_condition()){
+        verbose(`api: refusing to parse routes because import condition is false`)
+        return[];
+    }
     if (!existsSync(dir)) throw 'api: implementDir - no such directory '+dir;
     let endpoints:ApiEndpoint[]=[];
     verbose(`api: parsing routes from ${dir.toString()}`);

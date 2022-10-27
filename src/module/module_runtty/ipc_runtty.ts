@@ -1,30 +1,27 @@
 import { req, websock } from "../../common/ipc";
 import { attachedProcess, ranProcess, runner, runOptions, runPtySize } from "../../types/runner";
 import WebSocket from 'ws';
+import deasync from 'deasync';
 import { json } from "stream/consumers";
-async function get(result:{pid:number, tags:string[], key: string}):Promise<ranProcess>{
+async function get(result:{pid:number, tags:string[], key: string, _undefined?:boolean}):Promise<ranProcess>{
+    if (result._undefined){verbose(`runtty: daemon returned undefined when tried to proxy tty!!!`); return undefined;}
     verbose(`runtty: [${result.key}] proxying daemon child process, pid ${result.pid}`);
     return {
         tags: result.tags, key: result.key, pid: result.pid,
         onKilled(handler) {
-            req('/_ipc_runner/event_onKilled', {key: result.key}).then(r=>r.json()).then(r=>{
+            req('/_ipc_runner/event_onKilled', {key: result.key}).then(r=>{
                 verbose(`runtty: [${result.key}] got from daemon that process has been killed with exitCode ${r.exitCode}`);
                 handler(r.exitCode)});
         },
         kill() {
             verbose(`runtty: [${result.key}] proxied killing`);
-            req('/_ipc_runner/kill', {key:result.key}).then(r=>r.json())
+            req('/_ipc_runner/kill', {key:result.key})
         }, 
-        alive():boolean{
-            let alive:boolean|undefined = undefined;
-            req('/_ipc_runner/alive', {key:result.key}).then(r=>r.json()).then(r=>{
-                alive = r.alive;
-            });
-            while(typeof alive === 'undefined'){}
-            return alive;
+        async alive():Promise<boolean>{
+            return (await req('/_ipc_runner/alive', {key:result.key}) as {alive:boolean}).alive;
         },
         push(data) {
-            req('/_ipc_runner/push', {key:result.key, data:data}).then(r=>r.json())
+            req('/_ipc_runner/push', {key:result.key, data:data})
         },
         async attach():Promise<attachedProcess>{
             verbose(`runtty: [${result.key}] proxy attaching...`);

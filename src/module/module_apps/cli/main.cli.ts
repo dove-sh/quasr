@@ -18,7 +18,7 @@ export default async function({cli}:CliFunctionContext){
         verbose(`app_cli: ${(appProvider as any as Module).id} has app_cli feature`);
         var cliModule = appProvider as any as ApplicationCliModule;
         args.current_app = appInstance;
-        
+        args.current_provider = (appProvider as any as Module);
         await implementCliCommands(y, cliModule.application_cli, args, (appProvider as any as Module).id);
 
         verbose('app_cli: trying to run');

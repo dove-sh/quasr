@@ -5,6 +5,7 @@ import path from "path";
 import { openStdin } from "process";
 import { ConfigFileDiagnosticsReporter } from "typescript";
 import * as YAML from 'yaml'
+import { applicationStatus } from "./ApplicationStatus";
 import { IAppEntry } from "./IAppEntry";
 
 export interface IAppConfiguration{
@@ -16,8 +17,10 @@ export function getNewAppConfigPath(appId:string){
 }
 export abstract class Application{
     protected app:IAppEntry;
+    public app_id:string;
     protected config:IAppConfiguration;
     constructor(entry:IAppEntry){
+        this.app_id = entry.app_id;
         if (!existsSync(entry.app_config_path)) {
             if (!existsSync(path.dirname(entry.app_config_path)))
                 mkdirSync(path.dirname(entry.app_config_path), {recursive: true});
@@ -44,5 +47,5 @@ export abstract class Application{
     }
     abstract init():any;
     abstract state():any;
-    abstract status():Promise<string>;
+    abstract status():Promise<applicationStatus>;
 }
