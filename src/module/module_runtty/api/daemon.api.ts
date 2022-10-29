@@ -5,38 +5,39 @@ import { resourceLimits } from "worker_threads";
 import { runOptions, runPtySize } from "../../../types/runner";
 import * as ws from 'ws';
 import { json } from "stream/consumers";
-export default function(ctx:any):void{
-    ctx.app.post('/_ipc_runner/create', async (req:Request,res:Response)=>{
+import ApiContext from "../../module_api/types/ApiContext";
+export default function({app}:ApiContext):void{
+    app.post('/_ipc_runner/create', async (req:Request,res:Response)=>{
         let options = req.body as {options: runOptions, key: string, tags: string[]};
         let result = await runner.create(options.options, options.key, options.tags);
         return res.json(result ? {pid:result.pid, tags:result.tags, key: result.key} : {_undefined:true});
     });
-    ctx.app.post('/_ipc_runner/find', async (req:Request,res:Response)=>{
+    app.post('/_ipc_runner/find', async (req:Request,res:Response)=>{
         let options = req.body as {key: string};
         let result = await runner.find(options.key);
         return res.json(result ? {pid:result.pid, tags:result.tags, key: result.key} : {_undefined:true});
     });
-    ctx.app.post('/_ipc_runner/event_onKilled', async (req:Request,res:Response)=>{
+    app.post('/_ipc_runner/event_onKilled', async (req:Request,res:Response)=>{
         let instance = await runner.find(req.body.key);
         instance.onKilled((exitCode:number)=>{
             return res.json({exitCode});
         })
     });
-    ctx.app.post('/_ipc_runner/alive', async (req:Request,res:Response)=>{
+    app.post('/_ipc_runner/alive', async (req:Request,res:Response)=>{
         let instance = await runner.find(req.body.key);
         return res.json({alive:await instance.alive()});
     });
-    ctx.app.post('/_ipc_runner/kill', async (req:Request,res:Response)=>{
+    app.post('/_ipc_runner/kill', async (req:Request,res:Response)=>{
         let instance = await runner.find(req.body.key);
         instance.kill();
         return res.json(true);
     });
-    ctx.app.post('/_ipc_runner/push', async (req:Request, res:Response)=>{
+    app.post('/_ipc_runner/push', async (req:Request, res:Response)=>{
         let instance = await runner.find(req.body.key);
         instance.push(req.body.data);
         return res.json(req.body.data);
     })
-    ctx.app.ws('/_ipc_runner/attach/:key', async (ws:ws, req:Request)=>{
+    app.ws('/_ipc_runner/attach/:key', async (ws:ws, req:Request)=>{
         let instance = await runner.find(req.params.key);
         let attach = await instance.attach();
         let detached = false;

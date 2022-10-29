@@ -21,3 +21,11 @@ export async function getAppProvider(id: string):Promise<ApplicationModule|false
     var currentProvider = await getProvider(currentApp.app_provider);
     return currentProvider;
 }
+export async function getAppEntry(id: string):Promise<{config_path:string,id:string,path:string,provider:ApplicationModule}|false>{
+    var app = await storage.app.findOne({app_id: id}).exec();
+    if (!app) return false && verbose(`app: ${id} doesn't exist`);
+    var currentApp = (app as IAppEntry);
+    var currentProvider = await getProvider(currentApp.app_provider);
+
+    return {config_path: currentApp.app_config_path, id:currentApp.app_id, path: currentApp.app_path, provider: await getProvider(currentApp.app_provider)};
+}

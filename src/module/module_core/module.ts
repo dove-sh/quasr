@@ -4,6 +4,7 @@ import { includeCliDir } from "../module_cli";
 import { CliModule } from "../module_cli/types/cliCommand";
 import { init } from "./module_core";
 import getBrand from '../../base/brand';
+import { implementDirSync } from "../module_api";
 interface module_quasr_core extends Module,CliModule,ApiModule{}
 export default async ()=>{
     return {
@@ -15,6 +16,7 @@ export default async ()=>{
     depends: [], 
     icon: '🌃',
     loadAfter: [],
-    load: init,
+    load: init, 
+    endpoints: await implementDirSync(path.resolve(__dirname, 'module/module_core/api')),
     cliCommands: await includeCliDir(path.resolve(__dirname, 'module/module_core/cli'),{})
 } as module_quasr_core}

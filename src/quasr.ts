@@ -3,10 +3,12 @@ import { Dirent, existsSync, fstat, PathLike} from 'fs';
 import {readdir, readFile} from 'fs/promises';
 import { platform } from 'os';
 import { parse } from 'yaml';
-import { resolve } from 'path';
+import path, { resolve } from 'path';
 import cli_colors from './common/cli_colors';
 import * as mongo from './base/mongo';
 import * as url from 'url';
+import './common/promises';
+import { exec } from 'child_process';
 declare global{
     var context:Context;
     var verbose:Function;
@@ -21,7 +23,12 @@ global.__dirname = url.fileURLToPath(new URL('.', import.meta.url));
 global.isCli = true;
 //top-level async
 (async ():Promise<void>=>{
-    
+    if (process.platform=='win32'&&!process.argv.includes('--no-win32-warning')&&
+    (process.argv[process.argv.length-1].endsWith('.js')||
+    process.argv[process.argv.length-1].endsWith('quasr'))) {
+
+        await new Promise((rr:any,rj:any)=>exec('WScript.exe '+path.resolve(__dirname,'win32_warning.js'), rr));
+    }
     var lastVerboseMesasge:number=Date.now();
     global.verbose = function (l:any){
         if (process.argv&&process.argv.includes('-v')){

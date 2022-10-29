@@ -4,9 +4,11 @@ import {ApplicationCliModule, ApplicationModule, ApplicationApiModule} from '../
 import { MinecraftJavaApp } from "./mcjava";
 import { Application } from "../module_apps/types/Application";
 import { implementDefaultApi_base } from "../module_apps/api/base";
-import ApplicationApiContext from "../module_apps/types/ApplicationApiContext";
+import ApplicationApiContext from "../module_api/types/ApiContext";
 import { implementDefaultCli_base } from "../module_apps/cli/base";
 import { implementDefaultCli_startable } from "../module_apps/cli/startable";
+import { implementDefaultApi_startable } from "../module_apps/api/startable";
+
 interface module_quasr_app_mcjava extends
 Module,
 ApplicationModule,
@@ -21,7 +23,7 @@ export default async()=>{return {
     icon: '⛏️',
     features: ['application', 'app_cli'],
     application: MinecraftJavaApp as (typeof Application),
-    application_api: await implementDefaultApi_base(),
+    application_api: (await implementDefaultApi_base()).concat(await implementDefaultApi_startable()),
     application_cli: 
     (await implementDefaultCli_base())
     .concat(await implementDefaultCli_startable())

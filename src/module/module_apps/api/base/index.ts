@@ -1,8 +1,7 @@
+import path from "node:path";
 import { implementDirSync } from "../../../module_api";
-import { ApiEndpoint } from "../../../module_api/types/apiModule";
-import ApplicationApiContext from "../../types/ApplicationApiContext";
-import state from "./state";
-import status from './status';
-export function implementDefaultApi_base():ApiEndpoint[]{
-    return implementDirSync(__dirname);
+import { ApplicationApiEndpoint } from "../../types/ApplicationModule";
+
+export function implementDefaultApi_base():Promise<ApplicationApiEndpoint[]>{
+    return implementDirSync<ApplicationApiEndpoint>(path.resolve(__dirname,'module','module_apps','api','base'));
 }

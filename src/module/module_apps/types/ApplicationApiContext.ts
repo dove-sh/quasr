@@ -1,10 +1,12 @@
 import { Request, RequestHandler, Response } from "express";
-import { Application } from "./Application";
+import { WebsocketRequestHandler } from "express-ws";
+import { Application } from "../../module_apps/types/Application";
+import { AppHttpRequestHandler, AppWebsocketRequestHandler } from "./ApplicationModule";
 
 export default interface ApplicationApiContext{
-    api:{
-        get(endpoint:string,handler:RequestHandler):any,
-        post(endpoint:string,handler:RequestHandler):any,
-        ws(endpoint:string,handler:RequestHandler):any
+    app:{
+        get(endpoint:string,handler:AppHttpRequestHandler):any,
+        post(endpoint:string,handler:AppHttpRequestHandler):any,
+        ws(endpoint:string,handler:AppWebsocketRequestHandler):any
     }
 }

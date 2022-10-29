@@ -1,4 +1,4 @@
-interface Module{
+export interface Module{
     id:string
     name:string
     describe: string
