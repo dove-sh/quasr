@@ -91,7 +91,7 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication){
         if(process.platform!='win32'||this._config.startup.nogui)startup.push('nogui');
         verbose(`mc_java: starting minecraft server at ${jar}\njre nargs: ${startup.join(' ')}\nplatform: ${process.platform}\napp id: ${this.app.app_id}`)
         let currentRunner = await runner.create({path:process.platform=='win32' ? 'C:\\program files\\eclipse adoptium\\jre-19.0.0.36-hotspot\\bin\\java.exe' : 'sh', 
-        args: process.platform=='win32' ? startup : ['-c',startup.join(' ')],
+        args: process.platform=='win32' ? startup : ['-c','java '+startup.join(' ')],
         cwd: this._config.dir as string,
         size: {cols: 100, rows: 100}}, `app__${this.app.app_id}`, 
         ['application', 'mcjava', this.app.app_id]);

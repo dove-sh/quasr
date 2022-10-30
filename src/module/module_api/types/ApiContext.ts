@@ -6,6 +6,7 @@ export default interface ApiContext{
     app:{
         get(endpoint:string,handler:RequestHandler):any,
         post(endpoint:string,handler:RequestHandler):any,
+        put(endpoint:string,handler:RequestHandler):any,
         ws(endpoint:string,handler:WebsocketRequestHandler):any
     }
 }

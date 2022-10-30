@@ -8,6 +8,8 @@ import ApplicationApiContext from "../module_api/types/ApiContext";
 import { implementDefaultCli_base } from "../module_apps/cli/base";
 import { implementDefaultCli_startable } from "../module_apps/cli/startable";
 import { implementDefaultApi_startable } from "../module_apps/api/startable";
+import { Module } from "../../types/module";
+
 
 interface module_quasr_app_mcjava extends
 Module,

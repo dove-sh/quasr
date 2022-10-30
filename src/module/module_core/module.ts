@@ -5,6 +5,7 @@ import { CliModule } from "../module_cli/types/cliCommand";
 import { init } from "./module_core";
 import getBrand from '../../base/brand';
 import { implementDirSync } from "../module_api";
+import { Module } from "../../types/module";
 interface module_quasr_core extends Module,CliModule,ApiModule{}
 export default async ()=>{
     return {

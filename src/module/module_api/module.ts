@@ -3,6 +3,7 @@ import cli from './cli/_cli';
 import { ApiModule } from "./types/apiModule";
 import {implementDirSync} from './index';
 import path from "path";
+import { Module } from "../../types/module";
 interface quasr_module_api extends ApiModule, CliModule, Module{}
 
 export default async ()=>{

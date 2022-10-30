@@ -13,12 +13,14 @@ export function websock(endpoint: string):ws{
     else return tcp_ws(endpoint);
 }
 export function tcp_ws(endpoint: string):ws{
+    
     var websock = new ws('ws://' + (global.config.api.httpListen.replaceAll('0.0.0.0','127.0.0.1') ?? '127.0.0.1:7827') +endpoint);
     return websock;
 }
 export function unix_ws(endpoint: string):ws{
-    var websock = new ws('ws+unix://'+global.config.api.unixListen ?? '/var/run/quasr_api.sock'
-    +':'+endpoint);
+    let con = `ws+unix:${global.config.api.unixListen ?? '/var/run/quasr_api.sock'}:${endpoint}`;
+    verbose(`connect to unix ws: ${con}`)
+    var websock = new ws(con);
     return websock;
 }
 export async function http_req(endpoint:string, data:any={}, method:'post'|'get'='post'):Promise<any>{

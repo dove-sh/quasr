@@ -5,13 +5,15 @@ type HttpRequestHandler = (req:Request,res:Response)=>any;
 interface ApiModule{
     endpoints:ApiEndpoint[]
     api_middlewares:ApiMiddleware[]
+    api_middleware_order?:number
 }
 interface ApiEndpoint{
     endpoint:string, 
-    method: 'get'|'post'|'ws'
+    method: 'get'|'post'|'ws'|'put'
     handler:HttpRequestHandler|WebsocketRequestHandler
 }
 interface ApiMiddleware{
     endpoint?: string,
     handler(req:Request,res:Response,next:NextFunction):any
+    api_middleware_order?:number
 }

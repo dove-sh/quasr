@@ -1,8 +1,8 @@
 import { existsSync, fstat } from "fs";
 import * as path from "path";
 
-export default async function():Promise<Brand>{
-    let currentBrand = config.quasr.brand ?? 'default';
+export default async function(applyBrand?:string):Promise<Brand>{
+    let currentBrand = applyBrand ?? config.quasr.brand ?? 'default';
     if (
         !existsSync(path.resolve(__dirname, 'brand/'+currentBrand+'/brand.js'))
         ) currentBrand='default';

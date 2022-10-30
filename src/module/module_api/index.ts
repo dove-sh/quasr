@@ -35,6 +35,11 @@ export async function implementDirSync<T=ApiEndpoint>(dir:PathLike,context:any={
                         verbose(`api: ${dirent.name} imports post "${endpoint}"`);
                         endpoints.push({method: 'post', handler, endpoint} as T)
                     },
+                put: (endpoint: string, handler: Function)=>
+                    {
+                        verbose(`api: ${dirent.name} imports put "${endpoint}"`);
+                        endpoints.push({method: 'put', handler, endpoint} as T)
+                    },
                 ws: (endpoint: string, handler: Function)=>
                     {
                         verbose(`api: ${dirent.name} imports websocket "${endpoint}"`);

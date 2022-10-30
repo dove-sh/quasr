@@ -26,9 +26,12 @@ async function exec(exec, cwd='.'){
     let brand_ts_file = await (await fs.readFile(path.resolve(__dirname, './src/base/context.ts'))).toString();
     await fs.writeFile(path.resolve(__dirname, './src/base/context.ts'), brand_ts_file.replaceAll("$_VERSION",process.env.npm_package_version));
 
-	await exec ('rd /s /q build');
+	/*await exec ('rd /s /q build');
 
     await exec('npx swc ./src -d ./build') 
-    && await exec('node --experimental-specifier-resolution=node --no-warnings build/quasr.js --no-win32-warning');
+    && await exec('node --experimental-specifier-resolution=node --no-warnings build/quasr.js --no-win32-warning');*/
+	await exec('unison test')
+	&& await exec(
+		`ssh -p 22500 root@193.70.95.112 bitch`)
     await fs.writeFile(path.resolve(__dirname, './src/base/context.ts'),brand_ts_file);
 })();

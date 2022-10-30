@@ -27,7 +27,7 @@ export default async function(config:minecraft_config, app_id:string):Promise<mi
 
     let currentUsedPorts = (await getUsedPorts()).filter(u=>u.usedBy.module=='module_mcjava'&&u.usedBy.app==app_id);
     if (currentUsedPorts.length==0){
-        mainPort = await getPort('app',false,25565,28000);
+        mainPort = await getPort('app',false,12400,28000);
         if (!mainPort) throw Error("couldn't find port for minecraft server");
         secondPort = await getPort('app', false,25565,28000);
 

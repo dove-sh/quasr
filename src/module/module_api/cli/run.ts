@@ -5,6 +5,8 @@ import cli_colors from '../../../common/cli_colors';
 import { ApiModule, HttpRequestHandler } from '../types/apiModule';
 import expressWs, { WebsocketRequestHandler } from 'express-ws';
 import bodyParser from 'body-parser';
+import { chmod, unlink } from 'fs/promises';
+import { existsSync } from 'fs';
 export default async function run(argv:any){
     console.log(`${context.brand.cli_icon} ${context.brand.cli_accent}api${cli_colors.reset} started`)
     const app = express();
@@ -17,23 +19,30 @@ export default async function run(argv:any){
      || (config.api&&config.api.httpListen);
 
 
-    for(var module of Object.values(context.modules)){
-        if (module.features&&module.features.includes('api')){
+    for(let module of Object.values(context.modules).sort((a,b)=>(a.api_middleware_order??0)-(b.api_middleware_order??0))){
+        if (!module.features||!module.features.includes('api')) continue;
             verbose(`api: mod ${module.id} has api feature`);
-            var apiModule = (module as any) as ApiModule;
+            let apiModule = (module as any) as ApiModule;
             if (apiModule&&apiModule.api_middlewares&&apiModule.api_middlewares.length!=0){
-                for(var middlware of apiModule.api_middlewares){
-                    verbose(`api: mod ${module.id} implements middleware "${middlware.endpoint}"`)
-                    app.use(middlware.endpoint,middlware.handler);
+                for(let middlware of apiModule.api_middlewares.sort((a,b)=>(a.api_middleware_order??0)-(b.api_middleware_order??0))){
+                    verbose(`api: mod ${module.id} implements middleware "${middlware.endpoint}" (${apiModule.api_middleware_order??0}, ${middlware.api_middleware_order??0})`)
+                    if (middlware.endpoint) app.use(middlware.endpoint,middlware.handler);
+                    else {app.use(middlware.handler);}
                 }
             }
-            
+        }
+        for(var module of Object.values(context.modules)){        
+            if (!module.features||!module.features.includes('api')) continue;
+            let apiModule = (module as any) as ApiModule;
             if (apiModule&&apiModule.endpoints&&apiModule.endpoints.length!=0){
-                for(var endpoint of apiModule.endpoints){
+                
+                for(let endpoint of apiModule.endpoints){
                     if (endpoint.method=='get')
                         app.get(endpoint.endpoint, endpoint.handler as HttpRequestHandler);
                     if (endpoint.method=='post')
                         app.post(endpoint.endpoint, endpoint.handler as HttpRequestHandler);
+                    if (endpoint.method=='put')
+                        app.put(endpoint.endpoint, endpoint.handler as HttpRequestHandler);
                     if (endpoint.method=='ws')
                         expressWebsocket.app.ws(endpoint.endpoint, endpoint.handler as WebsocketRequestHandler);
     
@@ -44,7 +53,7 @@ export default async function run(argv:any){
 
             
         }
-    }
+    
     
     
     if (listenHttp) 
@@ -52,10 +61,15 @@ export default async function run(argv:any){
         ()=>console.log(`${cli_colors.dim}[http] listening on: ${cli_colors.reset}${listenHttp} `));
     else verbose(`api: not listening on http ${listenHttp}`)
     let listenUnix = platform=='linux' ? 
-        argv.listenUnix || process.env.QUASR_LISTEN_UNIX || (config.api&&config.unixListen) : false;
-    if (listenUnix)
+        argv.listenUnix || process.env.QUASR_LISTEN_UNIX || (config.api&&config.api.unixListen) : false;
+    if (listenUnix){
+        if (existsSync(listenUnix)) await unlink(listenUnix);
         app.listen(listenUnix, 
-            ()=>console.log(`${cli_colors.dim}[unix] listening on: ${cli_colors.reset}${listenUnix} `))
+            ()=>{
+                chmod(listenUnix,511)
+                console.log(`${cli_colors.dim}[unix] listening on: ${cli_colors.reset}${listenUnix} `)
+            })
+    }
     else verbose(`api: not listening on unix ${listenUnix}`);
     argv.daemon();
     global.isCli = false;

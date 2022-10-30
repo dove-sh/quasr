@@ -8,10 +8,12 @@ export interface Module{
     features: string[]
     depends: string[]
 
-    load: () => Promise<void>
-    loadAfter: string[]
-    start: () => Promise<void>
-    startAfter: string[]
-    stop: () => Promise<void>
-    stopAfter: string[]
+    load?: () => Promise<void>
+    loadAfter?: string[]
+    start?: () => Promise<void>
+    startAfter?: string[]
+    stop?: () => Promise<void>
+    stopAfter?: string[]
+    init?: () => Promise<void>
+    initAfter?: string[]
 }

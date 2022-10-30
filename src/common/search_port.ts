@@ -7,6 +7,7 @@ export async function getPort(portFor:string='any', includeUsedPorts:boolean=fal
     if (global.config.environment && global.config.environment.ports){
         portsAvailable = global.config.environment.ports;
         portsAvailable = portsAvailable.filter(p=>p.for==portFor);
+        
         if (host)portsAvailable=portsAvailable.filter(p=>p.privateIp==host);
     }
     var portsExcluded:number[] = [];
@@ -15,7 +16,10 @@ export async function getPort(portFor:string='any', includeUsedPorts:boolean=fal
         for(var port of usedPorts){
             portsExcluded.push(port.port);
             if (portsAvailable)portsAvailable=portsAvailable.filter
-            (p=>(p.privateIp!=host&&p.privateIp!='0.0.0.0')&&p.port!=port.port)
+            (p=>{
+                if ((p.privateIp==port.ip||p.privateIp=='0.0.0.0') && p.port==port.port) return false;
+                else return true;
+            })
         }
     }
     let ret:availablePortDefinition;
@@ -25,7 +29,9 @@ export async function getPort(portFor:string='any', includeUsedPorts:boolean=fal
         return {port: gotPort, privateIp: host??'0.0.0.0', publicIp:undefined} as availablePortDefinition;}catch(e){console.log(e)}
     }
     else{
+
         for(var portAvailable of portsAvailable){
+            console.dir(portsAvailable);
             try{
                 let gotPort = await _getPort({port:portAvailable.port, host:portAvailable.privateIp??'0.0.0.0'});
                 if (gotPort) return portAvailable;
@@ -45,7 +51,9 @@ export async function getUsedPorts():Promise<UsedPort[]>{
 export function getPublicIp(ip:string, port:number):string{
     if (config.environment && config.environment.ports){
         let avail = config.environment.ports.filter((p:any)=>p.privateIp==ip&&p.port==port);
+
         if (avail&&avail.length != 0&&avail[0].publicIp) return avail[0].publicIp;
+        else return '0.0.0.0';
     }
     // todo: fetch ip from dragonhost.org
     else return '0.0.0.0';
