@@ -7,10 +7,11 @@ import expressWs, { WebsocketRequestHandler } from 'express-ws';
 import bodyParser from 'body-parser';
 import { chmod, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
+import cors from 'cors';
 export default async function run(argv:any){
     console.log(`${context.brand.cli_icon} ${context.brand.cli_accent}api${cli_colors.reset} started`)
     const app = express();
-    // parse application/json
+    app.use(cors())
     app.use(bodyParser.json())
     var expressWebsocket = expressWs(app);
     
