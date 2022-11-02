@@ -5,6 +5,7 @@ import path from "path";
 import { openStdin } from "process";
 import { ConfigFileDiagnosticsReporter } from "typescript";
 import * as YAML from 'yaml'
+import { state } from "../../../types/state";
 import { applicationStatus } from "./ApplicationStatus";
 import { IAppEntry } from "./IAppEntry";
 
@@ -46,6 +47,6 @@ export abstract class Application{
         else return `/var/app_${this.app.app_id}`
     }
     abstract init():any;
-    abstract state():any;
+    abstract state():Promise<state[]>;
     abstract status():Promise<applicationStatus>;
 }

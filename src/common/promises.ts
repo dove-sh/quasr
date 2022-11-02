@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { Request, Response } from 'express';
 declare global{
     var tasks:runningTask[];
 }
@@ -64,6 +65,35 @@ export function wrapPromise(task:Function|Promise<any>,name="task"){
 	};
 	global.tasks.push(newTask);
 	return newTask;
+}
+export async function sseTask(task:runningTask, req: Request, res:Response){
+	console.log('task sse implemented');
+		res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Connection', 'keep-alive');
+		
+        res.setHeader('X-Accel-Buffering', 'no');
+        res.flushHeaders(); // flush the headers to establish SSE with client
+        function send(data:any){
+            if (connectionAlive) res.write('data: '+JSON.stringify(data)+'\n\n');
+        }
+        function end(){
+			if (connectionAlive) send({stream_end: true});
+			connectionAlive=false; res.end();
+		}
+
+        let connectionAlive = true;
+		send(await task.getState());
+
+        if (!task) { send({error: 'no such task', stream_end: true}); return end();}
+        res.on('end', ()=>{connectionAlive = false; end();})
+
+        
+        task.promise.then(async ff=>{
+			if (connectionAlive){send(await task.getState()); end();}
+		},
+        async rj=>{if (connectionAlive){send(await task.getState()); end();}});
 }
 export function getTasks(){
 	return global.tasks;

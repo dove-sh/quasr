@@ -1,4 +1,5 @@
 import { Request, Response } from "node-fetch";
+import { sseTask } from "../../../common/promises";
 import ApiContext from "../../module_api/types/ApiContext";
 
 export default function({app}:ApiContext):void{
@@ -8,7 +9,11 @@ export default function({app}:ApiContext):void{
         let state = await task.getState();
         return res.json({result:state});
     });
-    app.ws('/task/:taskId/watch', async (ws,req)=>{
+    app.get('/task/:taskId/watch', async (req,res)=>{
+        var task = global.tasks.find(t=>t.id==req.params.taskId);
+        sseTask(task, req, res);
+    })
+    app.ws('/task/:taskId/ws', async (ws,req)=>{
         var task = global.tasks.find(t=>t.id==req.params.taskId);
         ws.on('open', async ()=>{
             if (!task) ws.send(JSON.stringify({error: 'no such task'})), ws.close();

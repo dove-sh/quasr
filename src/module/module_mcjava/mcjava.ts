@@ -18,6 +18,8 @@ import { applicationPlayer, applicationStatus } from "../module_apps/types/Appli
 import * as server_properties from './utils/server_properties';
 import * as util from 'minecraft-server-util';
 import { getPublicIp } from "../../common/search_port";
+import { state } from "../../types/state";
+
 export class MinecraftJavaApp extends Mixin(Application, StartableApplication){
 
     private _config:minecraft_config;
@@ -147,8 +149,27 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication){
         await this.stop();
         await this.start();
     }
-    public state() {
-        throw new Error("Method not implemented.");
+    public async state():Promise<state[]> {
+        let process = await runner.find(`app__${this.app.app_id}`);
+        let serverRunning = process && (await process.alive());
+        if (!serverRunning) return [];
+
+        verbose(`app_mcjava: get server state`);
+        let serverPropPath = path.resolve(this._config.dir as string, 'server.properties');
+        let serverProps:any = {};
+        if (!existsSync(serverPropPath)) {
+            verbose(`app_mcjava: server_properties file doesn't exist!!! (${serverPropPath})`);
+            await writeFile(serverPropPath, '');serverProps={}
+        }
+        else serverProps = server_properties.parse((await readFile(serverPropPath)).toString());
+
+        let connectionIp = '127.0.0.1';
+        let bindingIp = '0.0.0.0';
+        if (serverProps['server-ip']&&serverProps.length!=0&&serverProps['server-ip']!='0.0.0.0') connectionIp = bindingIp =serverProps['server-ip'];
+        try{
+            let status = await util.status(connectionIp, parseInt(serverProps['server-port'].toString()));
+            return [{key: 'stat.players', current: status.players.online.toString(), max: status.players.max}];
+        }catch(e){return [];}
     }
     public async status(): Promise<applicationStatus> {
         
