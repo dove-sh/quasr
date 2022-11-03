@@ -20,6 +20,7 @@ export interface ranProcess{
     kill():void,
     attach():Promise<attachedProcess>,
     push(data:string):any,
+    getTerminalBuffer():Promise<string>
     onKilled(handler:(exitCode:number)=>any):void,
 }
 export interface attachedProcess{

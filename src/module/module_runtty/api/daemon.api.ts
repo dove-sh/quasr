@@ -17,6 +17,11 @@ export default function({app}:ApiContext):void{
         let result = await runner.find(options.key);
         return res.json(result ? {pid:result.pid, tags:result.tags, key: result.key} : {_undefined:true});
     });
+    app.post('/_ipc_runner/tbuf', async (req:Request, res:Response)=>{
+        let options = req.body as {key: string};
+        let result = await runner.find(options.key);
+        return res.json(result ? {buf:await result.getTerminalBuffer()} : {_undefined:true});
+    })
     app.post('/_ipc_runner/event_onKilled', async (req:Request,res:Response)=>{
         let instance = await runner.find(req.body.key);
         instance.onKilled((exitCode:number)=>{

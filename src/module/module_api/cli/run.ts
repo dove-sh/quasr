@@ -56,19 +56,21 @@ export default async function run(argv:any){
         }
     
     
-    
+    let listenUnix = platform=='linux' ? 
+        argv.listenUnix || process.env.QUASR_LISTEN_UNIX || (config.api&&config.api.unixListen) : false;
+    if (listenUnix&&existsSync(listenUnix)) await unlink(listenUnix);
     if (listenHttp) 
         app.listen(listenHttp.split(':')[1], listenHttp.split(':')[0],
         ()=>console.log(`${cli_colors.dim}[http] listening on: ${cli_colors.reset}${listenHttp} `));
     else verbose(`api: not listening on http ${listenHttp}`)
-    let listenUnix = platform=='linux' ? 
-        argv.listenUnix || process.env.QUASR_LISTEN_UNIX || (config.api&&config.api.unixListen) : false;
+
     if (listenUnix){
-        if (existsSync(listenUnix)) await unlink(listenUnix);
+        
         app.listen(listenUnix, 
             ()=>{
-                chmod(listenUnix,511)
                 console.log(`${cli_colors.dim}[unix] listening on: ${cli_colors.reset}${listenUnix} `)
+                chmod(listenUnix,511)
+                
             })
     }
     else verbose(`api: not listening on unix ${listenUnix}`);

@@ -9,6 +9,7 @@ import { implementDefaultCli_base } from "../module_apps/cli/base";
 import { implementDefaultCli_startable } from "../module_apps/cli/startable";
 import { implementDefaultApi_startable } from "../module_apps/api/startable";
 import { Module } from "../../types/module";
+import { implementDefaultApi_attachable } from "../module_apps/api/attachable";
 
 
 interface module_quasr_app_mcjava extends
@@ -25,7 +26,7 @@ export default async()=>{return {
     icon: '⛏️',
     features: ['application', 'app_cli'],
     application: MinecraftJavaApp as (typeof Application),
-    application_api: (await implementDefaultApi_base()).concat(await implementDefaultApi_startable()),
+    application_api: (await implementDefaultApi_base()).concat(await implementDefaultApi_startable()).concat(await implementDefaultApi_attachable()),
     application_cli: 
     (await implementDefaultCli_base())
     .concat(await implementDefaultCli_startable())

@@ -33,5 +33,6 @@ async function exec(exec, cwd='.'){
 	await exec('unison test')
 	&& await exec(
 		`ssh -p 22500 root@193.70.95.112 bitch`)
+		//&& await exec(`ssh -p 22500 root@193.70.95.112 quasr svc run -v`)
     await fs.writeFile(path.resolve(__dirname, './src/base/context.ts'),brand_ts_file);
 })();

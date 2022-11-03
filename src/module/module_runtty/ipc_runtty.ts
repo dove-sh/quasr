@@ -17,6 +17,10 @@ async function get(result:{pid:number, tags:string[], key: string, _undefined?:b
             verbose(`runtty: [${result.key}] proxied killing`);
             req('/_ipc_runner/kill', {key:result.key})
         }, 
+        async getTerminalBuffer() {
+            verbose(`runtty: [${result.key}] get buffer`);
+            return (await req('/_ipc_runner/tbuf')).buf;
+        },
         async alive():Promise<boolean>{
             return (await req('/_ipc_runner/alive', {key:result.key}) as {alive:boolean}).alive;
         },

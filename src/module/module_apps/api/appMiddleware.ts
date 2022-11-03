@@ -6,7 +6,7 @@ import { Application } from "../types/Application";
 import { AppHttpRequestHandler, ApplicationApiModule, AppWebsocketRequestHandler } from "../types/ApplicationModule";
 import * as ws from 'ws';
 export async function app_middleware (req:Request,res:Response,next:NextFunction){
-    verbose('app: trying to implement middleware')
+    //verbose('app: trying to implement middleware')
     let appProvider = await getAppProvider(req.params.appId);
     let appInstance = await getAppInstance(req.params.appId);
 

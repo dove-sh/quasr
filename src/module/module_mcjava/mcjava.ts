@@ -19,8 +19,12 @@ import * as server_properties from './utils/server_properties';
 import * as util from 'minecraft-server-util';
 import { getPublicIp } from "../../common/search_port";
 import { state } from "../../types/state";
+import { appAttachable, appTerminal, AttachableApplication } from "../module_apps/types/AttachableApplication";
+import { terminal } from "../module_apps/terminal";
+import { forEachChild } from "typescript";
 
-export class MinecraftJavaApp extends Mixin(Application, StartableApplication){
+export class MinecraftJavaApp extends Mixin(Application, StartableApplication, AttachableApplication){
+    
 
     private _config:minecraft_config;
     constructor(entry:IAppEntry){
@@ -134,14 +138,24 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication){
 
         process.push(`\r/stop\r`);
         let alreadyExited = false;
+        let forceKilled = false;
         let timeout = setTimeout(()=>{
             if (!alreadyExited) {
                 verbose(`mc_java: server didn't stop in 7s, force killing it`);
                 process.kill();
+                forceKilled=true;
             }
-        }, 7000);
-        await new Promise((resolve,reject)=>{
-            process.onKilled(exitCode=>{alreadyExited = true; clearTimeout(timeout); resolve(exitCode)})
+        }, 7500);
+        return await new Promise((resolve,reject)=>{
+            setTimeout(()=>{
+                if (forceKilled) resolve(0);
+                
+            }, 8000)
+            process.onKilled(exitCode=>{
+                if (forceKilled) return;
+                verbose(`mc_java: onkilled reached`)
+                alreadyExited = true; clearTimeout(timeout); resolve(exitCode)
+            })
         });
 
     }
@@ -154,7 +168,7 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication){
         let serverRunning = process && (await process.alive());
         if (!serverRunning) return [];
 
-        verbose(`app_mcjava: get server state`);
+        //verbose(`app_mcjava: get server state`);
         let serverPropPath = path.resolve(this._config.dir as string, 'server.properties');
         let serverProps:any = {};
         if (!existsSync(serverPropPath)) {
@@ -175,7 +189,7 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication){
         
         let serverPropPath = path.resolve(this._config.dir as string, 'server.properties');
         let serverProps:any = {};
-        verbose(`app_mcjava: get server status`);
+        //verbose(`app_mcjava: get server status`);
         if (!existsSync(serverPropPath)) {
             verbose(`app_mcjava: server_properties file doesn't exist!!! (${serverPropPath})`);
             await writeFile(serverPropPath, '');serverProps={}
@@ -201,7 +215,7 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication){
         status.bind = {publicIp, privateIp: serverProps['server-ip']??'0.0.0.0', port: serverProps['server-port'], proto: 'udp'};
 
         if (serverRunning && serverProps['query.port']&&serverProps['enable-query']){
-            verbose(`app_mcjava: server is running, connecting to query (${connectionIp}:${serverProps['query.port']})`);
+           // verbose(`app_mcjava: server is running, connecting to query (${connectionIp}:${serverProps['query.port']})`);
             try{
                 let query = await util.queryFull(connectionIp, serverProps['query.port']);
                 // todo: get colored motd
@@ -218,6 +232,21 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication){
             catch(e){}
         }
         return status;
+    }
+
+    async getAttachables(): Promise<appAttachable[]> {
+        let process = await runner.find(`app__${this.app.app_id}`);
+        let serverRunning = process && (await process.alive());
+        if (!serverRunning) return [];
+        else return [{target:`running`, type:'xterm', icon:'terminal', name: 'Minecraft server'}];
+    }
+    async attach(target: string): Promise<appTerminal> {
+        if (target != 'running') throw new Error(`${target} is not implemented`);
+        let process = await runner.find(`app__${this.app.app_id}`);
+        let serverRunning = process && (await process.alive());
+        if (!serverRunning) throw new Error(`app is not running`);
+
+        return await terminal(process);
     }
 
 }
