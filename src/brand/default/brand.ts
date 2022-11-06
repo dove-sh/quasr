@@ -1,6 +1,8 @@
 import c from '../../common/cli_colors';
 export default{
     cli_accent: c.magenta, 
+    
+    id:'default',
     cli_icon: "🐦",
     cli_logo:
 `

@@ -20,6 +20,10 @@ declare global{
     var isCli:boolean;
     var distro:distroInfo;
 }
+declare global{
+	var publicRoutes:string[];
+}
+if (!global.publicRoutes)global.publicRoutes=[];
 
 global.__filename = url.fileURLToPath(import.meta.url);
 global.__dirname = url.fileURLToPath(new URL('.', import.meta.url));

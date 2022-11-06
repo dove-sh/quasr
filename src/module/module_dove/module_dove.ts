@@ -5,6 +5,7 @@ import { parsePortList, parseVal } from "./common/parseVal";
 import c from '../../common/cli_colors';
 import applyBrand from '../../base/brand';
 import { model, Schema } from "mongoose";
+
 export interface doveEnvironment{
     apiDomain?:string,
     isContainer:boolean,
@@ -41,6 +42,7 @@ using default configuration, everything is messed up too much here so extremely 
 	return config;
 }
 export async function module_load(){
+	if (!publicRoutes) global.publicRoutes = [];
     global.config.environment = await getDoveEnv();
     verbose(`dove_env: look at this config!`);
     verbose(global.config.environment);

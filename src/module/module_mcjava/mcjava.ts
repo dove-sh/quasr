@@ -21,7 +21,8 @@ import { getPublicIp } from "../../common/search_port";
 import { state } from "../../types/state";
 import { appAttachable, appTerminal, AttachableApplication } from "../module_apps/types/AttachableApplication";
 import { terminal } from "../module_apps/terminal";
-import { forEachChild } from "typescript";
+import { event } from "../../base/mongo/event";
+import {stats} from "../../base/mongo/stats";
 
 export class MinecraftJavaApp extends Mixin(Application, StartableApplication, AttachableApplication){
     
@@ -47,6 +48,7 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication, A
         return memSizeMib;
     }
     public async init() {
+        await event('quasr_app_created', this.app.app_id);
         let load = `https://piston-data.mojang.com/v1/objects/f69c284232d7c7580bd89a5a4931c3581eae1378/server.jar`;
         if (global.config.mcjava&&global.config.mcjava.init&&global.config.mcjava.init_files)
             load = global.config.mcjava.init_files;
@@ -84,6 +86,7 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication, A
         await this.saveConfig(this._config);
     }
     public async start(): Promise<any> {
+        await event('quasr_app_start', this.app.app_id);
         var maybeProcessAlreadyRunning = await runner.find(`app__${this.app.app_id}`);
         if (maybeProcessAlreadyRunning&&(await maybeProcessAlreadyRunning.alive())) throw Error(`application is already running (pid: ${maybeProcessAlreadyRunning.pid})`)
 
@@ -95,7 +98,8 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication, A
         `-Xms${this._config.startup.xms ?? this.getMemSizeMiB(0, 2048)}M`,
         `-jar`, jar];
         if(process.platform!='win32'||this._config.startup.nogui)startup.push('nogui');
-        verbose(`mc_java: starting minecraft server at ${jar}\njre nargs: ${startup.join(' ')}\nplatform: ${process.platform}\napp id: ${this.app.app_id}`)
+        verbose(`mc_java: starting minecraft server at ${jar}\njre nargs: ${startup.join(' ')}\nplatform: ${process.platform}\napp id: ${this.app.app_id}`);
+        await event('quasr_app_starting', this.app.app_id, `starting ${jar}\njre nargs: ${startup.join(' ')}\nplatform: ${process.platform}\napp id: ${this.app.app_id}`);
         let currentRunner = await runner.create({path:process.platform=='win32' ? 'C:\\program files\\eclipse adoptium\\jre-19.0.0.36-hotspot\\bin\\java.exe' : 'sh', 
         args: process.platform=='win32' ? startup : ['-c','java '+startup.join(' ')],
         cwd: this._config.dir as string,
@@ -109,19 +113,21 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication, A
                 //resolve(true);
             }
             let dataHandled = "";
-            attached.onOutput(o=>{
+            attached.onOutput(async o=>{
                 dataHandled+=o;
                 if (dataHandled.includes(`For help, `)) {
                     verbose(`mc_java: server finished loading`);
+                    await event('quasr_app_startedok', this.app.app_id);
                     startedSucessfully = true; attached.detach(); resolve(true);
                 }
             });
-            attached.onKilled(o=>{
+            attached.onKilled(async o=>{
                 verbose(`mc_java: server killed`);
                 if (!startedSucessfully) {
                     verbose(`mc_java: crashed?`);
                     attached.detach(); 
-                    
+                    await event('quasr_app_startup_crashed', this.app.app_id,`looks like server crashed (exited before fully starting up) \n${dataHandled.replaceAll("\n","<br>").replace(
+                        /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '').replaceAll('<br>',"\n")}`);
                     resolve(new Error(`looks like server crashed (exited before fully starting up) \n${dataHandled.replaceAll("\n","<br>").replace(
                         /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '').replaceAll('<br>',"\n")}`));
                 }
@@ -132,16 +138,17 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication, A
         else throw result;
     }
     public async stop(): Promise<any> {
-
+        await event('quasr_app_stopped', this.app.app_id);
         let process = await runner.find(`app__${this.app.app_id}`);
         if (!process || !(await process.alive())) throw Error(`application is not running`);
 
         process.push(`\r/stop\r`);
         let alreadyExited = false;
         let forceKilled = false;
-        let timeout = setTimeout(()=>{
+        let timeout = setTimeout(async ()=>{
             if (!alreadyExited) {
                 verbose(`mc_java: server didn't stop in 7s, force killing it`);
+                await event('quasr_app_forcekilled', this.app.app_id);
                 process.kill();
                 forceKilled=true;
             }
@@ -151,8 +158,9 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication, A
                 if (forceKilled) resolve(0);
                 
             }, 8000)
-            process.onKilled(exitCode=>{
+            process.onKilled(async exitCode=>{
                 if (forceKilled) return;
+                await event('quasr_app_killed', this.app.app_id);
                 verbose(`mc_java: onkilled reached`)
                 alreadyExited = true; clearTimeout(timeout); resolve(exitCode)
             })
@@ -180,9 +188,12 @@ export class MinecraftJavaApp extends Mixin(Application, StartableApplication, A
         let connectionIp = '127.0.0.1';
         let bindingIp = '0.0.0.0';
         if (serverProps['server-ip']&&serverProps.length!=0&&serverProps['server-ip']!='0.0.0.0') connectionIp = bindingIp =serverProps['server-ip'];
+        let st = [];
         try{
             let status = await util.status(connectionIp, parseInt(serverProps['server-port'].toString()));
-            return [{key: 'stat.players', current: status.players.online.toString(), max: status.players.max}];
+            st = [{key: 'stat.players', current: status.players.online.toString(), max: status.players.max}];
+            await stats(st,this.app.app_id);
+            return st;
         }catch(e){return [];}
     }
     public async status(): Promise<applicationStatus> {

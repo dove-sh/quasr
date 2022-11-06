@@ -2,6 +2,7 @@ import c from '../../common/cli_colors';
 const semired = `${c.red}${c.dim}`;
 export default{
     cli_accent: c.red, 
+    id:'dragonhost.org',
     cli_icon: "🐲",
     cli_logo:
 /*`
